@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "dino-blade-merge",
+  "name": "Dino Blade Merge",
+  "version": "1.0.0",
+  "entry": "dist/index.html",
+  "category": "action",
+  "age": "7+",
+  "cover": "cover.png",
+  "description": "Funde lâminas, desbloqueia poderes e vence alvos rotativos na floresta.",
+  "offline": true,
+  "multiplayer": false,
+  "permissions": [
+    "storage"
+  ],
+  "languages": [
+    "pt-PT"
+  ],
+  "assets": [
+    "dist/app-storage.js",
+    "dist/engine.js",
+    "dist/game.js",
+    "dist/index.html",
+    "dist/sdk/dinoplay-game-sdk.js",
+    "dist/style.css",
+    "cover.png"
+  ],
+  "license": "MIT",
+  "author": "Master-Devs171"
+}

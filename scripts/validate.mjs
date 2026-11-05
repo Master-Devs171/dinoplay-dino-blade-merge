@@ -1,0 +1,22 @@
+import {access,readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+const fail=m=>{throw new Error(`DinoPlay validation failed: ${m}`)};
+const m=JSON.parse(await readFile(resolve(root,'manifest.json'),'utf8'));
+if(m.schemaVersion!==1)fail('schemaVersion must be 1');
+if(!/^[a-z][a-z0-9-]{2,31}$/.test(m.id||''))fail('invalid id');
+if(!/^\d+\.\d+\.\d+$/.test(m.version||''))fail('version must use semver');
+if(!['learn','puzzle','create','explore','action','sports','music'].includes(m.category))fail('invalid category');
+if(!/^[3-9]\+$/.test(m.age||''))fail('age must look like 5+');
+if(m.offline!==true)fail('games must work offline');
+if(!Array.isArray(m.languages)||!m.languages.length)fail('languages are required');
+if(!Array.isArray(m.permissions)||m.permissions.some(p=>!['storage','multiplayer','entitlements'].includes(p)))fail('invalid permissions');
+if(m.multiplayer&&!m.permissions.includes('multiplayer'))fail('multiplayer permission is required');
+if(!Array.isArray(m.assets)||!m.assets.length)fail('assets are required');
+const safe=p=>typeof p==='string'&&p.length<180&&!/^(?:[a-z]+:|\/|\\)/i.test(p)&&!p.split(/[\\/]/).includes('..');
+for(const p of [m.entry,m.cover,...m.assets]){if(!safe(p))fail(`unsafe path ${p}`);await access(resolve(root,p)).catch(()=>fail(`missing asset ${p}`))}
+const html=await readFile(resolve(root,m.entry),'utf8');
+if(/https?:\/\//i.test(html))fail('remote resources are forbidden');
+if(!html.includes('Content-Security-Policy'))fail('Content Security Policy is required');
+if(!html.includes('dinoplay-game-sdk.js'))fail('DinoPlay SDK is required');
+console.log(`${m.name} ${m.version}: valid DinoPlay package (${m.assets.length} assets).`);

@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const source=await readFile(new URL('./dist/app-storage.js',import.meta.url),'utf8');
+const local=new Map([['nico-coins','12']]);
+globalThis.window={parent:null,localStorage:{getItem:k=>local.get(k)??null,setItem:(k,v)=>local.set(k,v)}};
+window.parent=window;
+let {progressStore}=await import('data:text/javascript;base64,'+Buffer.from(source+'\n// standalone').toString('base64'));
+assert.equal(progressStore.getItem('nico-coins'),'12');progressStore.setItem('nico-coins',15);assert.equal(local.get('nico-coins'),'15');
+const host=new Map([['nico-coins','29']]);let closed=false,button;
+window={parent:{},localStorage:{getItem(){throw Error('App must not use browser storage')},setItem(){throw Error('App must not use browser storage')}},DinoPlay:{ready:async()=>({}),storage:{get:async k=>host.get(k),set:async(k,v)=>host.set(k,v)},close:async()=>{closed=true}}};
+globalThis.document={createElement(){return {addEventListener(type,handler){this.click=handler}}},body:{append(b){button=b}}};
+({progressStore}=await import('data:text/javascript;base64,'+Buffer.from(source+'\n// embedded').toString('base64')));
+assert.equal(progressStore.getItem('nico-coins'),'29');progressStore.setItem('nico-coins',31);assert.equal(host.get('nico-coins'),'31');assert.equal(button.textContent,'Voltar à biblioteca');await button.click();assert.equal(closed,true);
+console.log('Passed: standalone progress, DinoPlay storage isolation and return to library.');

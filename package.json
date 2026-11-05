@@ -1,0 +1,11 @@
+{
+  "name": "dinoplay-dino-blade-merge",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs && node test-powers.mjs && node test-storage.mjs",
+    "dev": "node server.cjs",
+    "validate": "node scripts/validate.mjs"
+  },
+  "license": "MIT"
+}
