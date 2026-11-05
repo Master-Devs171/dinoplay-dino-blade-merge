@@ -16,7 +16,7 @@ Depois de cada vitória escolhe uma melhoria permanente de dano, cadência ou pr
 
 [Jogar agora](https://dino-blade-merge-master171.master-171.chatgpt.site/) · [Código no GitHub](https://github.com/Master-Devs171/dinoplay-dino-blade-merge)
 
-![Dino Blade Merge](cover.png)
+![Dino Blade Merge](cover.jpg)
 
 Pacote DinoPlay: manifest.json aponta para dist/index.html. Inclui o SDK local, guarda progresso através da app quando integrado e permite voltar à biblioteca. Fora da app funciona sem login e guarda o progresso neste dispositivo. Idioma atual: português. Todos os recursos de execução são locais; sem anúncios, pagamentos ou serviços externos.
 
