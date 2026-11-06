@@ -3,3 +3,13 @@
 .header-tools{display:flex;gap:5px}.brand b{font-size:13px}.brand small{font-size:8px}.card{max-height:calc(100dvh - 40px);overflow:auto}#dialog-content{margin-top:18px}.upgrade{display:flex;align-items:center;text-align:left;gap:12px;background:#f5e7bf;border:2px solid #d5c28f;color:#40583d;padding:12px!important;margin-top:8px!important}.upgrade>i{display:grid;place-items:center;min-width:32px;height:32px;border-radius:9px;background:#aec984;color:#426341;font-size:23px;font-style:normal}.upgrade b{display:block;font-size:12px}.upgrade small{display:block;margin-top:4px;font-size:10px;font-weight:normal;line-height:1.4}.upgrade.chosen{background:#c7dda2;border-color:#6b9c50}.upgrade:disabled{opacity:.7}.upgrade.chosen:disabled{opacity:1}.collection-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.collection-item{background:#e7dfba;border:1px solid #d1c296;border-radius:12px;padding:8px}.collection-item canvas{width:70px;height:70px}.collection-item b{display:block;font-size:11px}.collection-item small{display:block;font-size:8px;line-height:1.4;margin-top:5px;color:#6e7f57}.collection-item.locked{filter:grayscale(1);opacity:.45}#freeze{position:absolute;top:50%;left:12%;border:2px solid #d8f9ee;background:linear-gradient(#a4dfe8,#559fae);color:#224f59;border-radius:12px;padding:8px 10px;box-shadow:0 3px 0 #3b7583;font-weight:bold;font-size:9px;touch-action:manipulation}#freeze small{display:block;font-size:7px;margin-top:4px}#freeze.active{background:#e0fbfc;box-shadow:0 0 20px #b1fbff}#freeze:disabled{opacity:.5}@media(max-height:650px){.header-tools{gap:3px}.brand b{font-size:10px}.brand small{font-size:6px}#freeze{font-size:7px;padding:5px 7px;top:48%}.upgrade{padding:9px!important}.card{padding:18px}h1{font-size:24px}}
 
 #dinoplay-exit{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1000;border:1px solid #fff8;border-radius:20px;background:#10263ce8;color:white;padding:8px 16px;font:600 12px system-ui;cursor:pointer}
+
+/* The illustrated instructions stay inside the same scrollable dialog. */
+.guide-art { width: 100%; max-height: 150px; object-fit: cover; object-position: center 40%; border-radius: 12px; display: block; }
+.guide-steps { text-align: left; padding-left: 1.4em; font-size: .86rem; line-height: 1.5; }
+.guide-steps li + li { margin-top: .35em; }
+#overlay[data-kind="intro"] .card, #overlay[data-kind="help"] .card { width: min(420px, 100%); }
+
+body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { display: none; }
+#overlay { padding-bottom: 48px; }
+#overlay > div { max-height: calc(100dvh - 72px); overflow: auto; }
