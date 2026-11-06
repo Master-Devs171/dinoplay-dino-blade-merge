@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';import {Arena,angularDistance,MAX_KNIVES} from './dist/engine.js';
+import assert from 'node:assert/strict';import {Arena,angularDistance,MAX_KNIVES,MAX_BLADE_LEVEL,BLADES} from './dist/engine.js';
 const a=new Arena();assert.equal(a.merge(0,0),false);assert.equal(a.merge(-1,0),false);assert.equal(a.merge(0,2),false);assert.equal(a.merge(0,1),true);assert.equal(a.slots[0],0);assert.equal(a.slots[1],2);assert.equal(a.level,2);assert.equal(a.merge(1,2),true);assert.equal(a.level,3);assert.equal(a.best,3);const before=a.coins,cost=a.cost;assert.equal(a.buy(),true);assert.equal(a.coins,before-cost);assert.equal(a.slots[0],1);a.coins=0;assert.equal(a.buy(),false);assert.equal(a.coins,0);assert.equal(a.move(0,7),true);assert.equal(a.slots[7],1);assert.equal(a.slots[0],0);assert.equal(a.move(7,2),false);
 const snap=a.snapshot(),restored=new Arena(snap);assert.deepEqual(restored.slots,a.slots);assert.equal(restored.wave,a.wave);assert.equal(new Arena({slots:[99]}).slots[0],1);assert.equal(new Arena({slots:Array(8).fill(0)}).slots[0],1);assert.ok(angularDistance(.01,Math.PI*2-.01)<.03);
 const b=new Arena();b.stuck=[{angle:Math.PI/2,level:1}];b.shots=[{x:240,y:310,level:1,delay:0,hit:false}];b.update(.01);assert.equal(b.lives,2);assert.equal(b.hp,b.maxHP);assert.equal(b.stuck.length,0);b.shots=[{x:240,y:310,level:3,delay:0,hit:false}];b.stuck=[{angle:Math.PI/2-b.angle,level:1}];b.update(.01);assert.ok(b.hp<b.maxHP);assert.equal(b.lives,2);
@@ -48,3 +48,20 @@ loot.angle=Math.PI/2-loot.thornAngle();loot.shots=[{x:240,y:310,level:3,delay:0,
 assert.equal(loot.lives,1);assert.equal(loot.hp,loot.maxHP);
 hitPickup('heart');assert.equal(loot.lives,2);assert.equal(loot.pickups().some(p=>p.kind==='heart'),false);
 console.log('Passed: collectible rewards, retry persistence, challenge thorns and heart recovery.');
+
+const catalogue=new Arena();
+assert.equal(BLADES.length-1,50);
+assert.equal(new Set(BLADES.slice(1).map(blade=>blade.name)).size,50);
+for(let level=8;level<MAX_BLADE_LEVEL;level++){
+ catalogue.slots=[level,level,0,0,0,0,0,0];
+ assert.equal(catalogue.merge(0,1),true);
+ assert.equal(catalogue.level,level+1);
+}
+const legendary=new Arena(catalogue.snapshot());
+assert.equal(legendary.level,50);
+legendary.slots[0]=50;
+assert.equal(legendary.merge(0,1),false);
+legendary.coins=1000;
+assert.equal(legendary.buy(),true);
+assert.ok(legendary.slots.includes(49));
+console.log('Passed: 50 blade types, fusion past level 8 and level 50 saves.');

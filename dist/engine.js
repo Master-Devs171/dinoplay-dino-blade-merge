@@ -1,13 +1,28 @@
 export const MAX_KNIVES = 50;
+export const MAX_BLADE_LEVEL = 50;
 const INITIAL_SLOTS = 8;
 export const BLADES=[null,{name:'Exploradora',damage:2,color:'#d5e8e7',effect:'Lançamento simples'},{name:'Curva da selva',damage:3,color:'#a7d7cb',effect:'Impacto reforçado'},{name:'Lança de âmbar',damage:5,color:'#ffd172',effect:'Perfuração: atravessa lâminas'},{name:'Gémeas',damage:8,color:'#acb6f5',effect:'Golpe reforçado: uma lâmina'},{name:'Cristal',damage:13,color:'#8ce4ed',effect:'Golpe de cristal: uma lâmina'},{name:'Bumerangue',damage:21,color:'#f6a66d',effect:'Retorno: segundo impacto'},{name:'Estrela antiga',damage:34,color:'#d398ed',effect:'Ricochete: dano extra'},{name:'Relíquia Dino',damage:55,color:'#f4d270',effect:'Poder ancestral completo'}];
+const bladeFamilies = ['Sabre','Estilete','Falchion','Punhal','Cimitarra','Kukri','Lâmina'];
+const bladeMaterials = ['de jade','de obsidiana','de coral','de safira','de prata','de rubi'];
+for (let level = 9; level <= MAX_BLADE_LEVEL; level++) {
+ const offset = level - 9;
+ const profile = offset % bladeFamilies.length;
+ const material = Math.floor(offset / bladeFamilies.length);
+ BLADES.push({
+  name: bladeFamilies[profile] + ' ' + bladeMaterials[material],
+  damage: Math.round(55 * Math.pow(1.12, level - 8)),
+  color: ['#7de2a7','#a79ad8','#ff9d83','#7dbfff','#cadfea','#fc7792'][material],
+  profile,
+  effect: 'Perfuração reforçada'
+ });
+}
 export const angularDistance=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
 export const UPGRADES={power:{name:'Fio reforçado',description:'+10% de dano em todos os lançamentos',icon:'✦'},speed:{name:'Mãos rápidas',description:'Lança mais depressa',icon:'»'},bounty:{name:'Tesouro da floresta',description:'+2 moedas no prémio de cada fase',icon:'◈'}};
 export class Arena{
  constructor(saved){
  this.slots=[1,1,2,2,0,0,0,0];this.coins=40;this.wave=1;this.buys=0;this.best=2;this.upgrades={power:0,speed:0,bounty:0};
- const valid=saved&&Array.isArray(saved.slots)&&saved.slots.length>=INITIAL_SLOTS&&saved.slots.length<=MAX_KNIVES&&saved.slots.every(x=>Number.isInteger(x)&&x>=0&&x<=8)&&saved.slots.some(x=>x>0);
- if(valid){this.slots=[...saved.slots];this.coins=Math.max(0,Math.min(1e7,Math.floor(Number(saved.coins)||0)));this.wave=Math.max(1,Math.min(999,Math.floor(Number(saved.wave)||1)));this.buys=Math.max(0,Math.min(9999,Math.floor(Number(saved.buys)||0)));this.best=Math.max(...this.slots);for(const k of Object.keys(this.upgrades))this.upgrades[k]=Math.max(0,Math.min(10,Math.floor(Number(saved.upgrades?.[k])||0)))}
+ const valid=saved&&Array.isArray(saved.slots)&&saved.slots.length>=INITIAL_SLOTS&&saved.slots.length<=MAX_KNIVES&&saved.slots.every(x=>Number.isInteger(x)&&x>=0&&x<=MAX_BLADE_LEVEL)&&saved.slots.some(x=>x>0);
+ if(valid){this.slots=[...saved.slots];this.coins=Math.max(0,Math.min(1e7,Math.floor(Number(saved.coins)||0)));this.wave=Math.max(1,Math.min(999,Math.floor(Number(saved.wave)||1)));this.buys=Math.max(0,Math.min(9999,Math.floor(Number(saved.buys)||0)));this.best=Math.max(...this.slots,Math.min(MAX_BLADE_LEVEL,Math.floor(Number(saved.best)||0)));for(const k of Object.keys(this.upgrades))this.upgrades[k]=Math.max(0,Math.min(10,Math.floor(Number(saved.upgrades?.[k])||0)))}
  this.challenge=valid&&saved.challenge===true;
  this.collectedLoot=new Set(valid&&Array.isArray(saved.collectedLoot)?saved.collectedLoot.filter(kind=>kind==='coins'||kind==='blade'):[]);
  this.equipped=this.slots.findIndex(x=>x>0);this.events=[];this.begin();if(valid&&saved.pendingVictory===true){this.status='won';this.hp=0;this.rewardClaimed=saved.rewardClaimed===true;this.lastReward=Math.max(0,Math.min(1e6,Number(saved.lastReward)||0))}
@@ -16,7 +31,7 @@ export class Arena{
  get level(){return this.slots[this.equipped]||1}
  get reward(){return 12+this.wave*4+this.upgrades.bounty*2}
  get rate(){return Math.max(.15,.33-this.upgrades.speed*.018)}
- snapshot(){return {slots:[...this.slots],coins:this.coins,wave:this.wave,buys:this.buys,upgrades:{...this.upgrades},pendingVictory:this.status==='won',rewardClaimed:this.rewardClaimed,lastReward:this.lastReward,challenge:this.challenge,collectedLoot:[...this.collectedLoot]}}
+ snapshot(){return {slots:[...this.slots],coins:this.coins,wave:this.wave,buys:this.buys,best:this.best,upgrades:{...this.upgrades},pendingVictory:this.status==='won',rewardClaimed:this.rewardClaimed,lastReward:this.lastReward,challenge:this.challenge,collectedLoot:[...this.collectedLoot]}}
  begin(){this.boss=this.wave%5===0;this.maxHP=Math.min(1e7,Math.round((10+this.wave*4)*Math.pow(1.08,this.wave-1)*(this.boss?1.7:1)));this.hp=this.maxHP;this.maxLives=this.challenge?2:3;this.lives=this.maxLives;this.heartCollected=false;this.angle=0;this.time=0;this.cooldown=0;this.stuck=[];this.shots=[];this.status='playing';this.events=[];this.freezeTime=0;this.freezeUsed=false;this.rewardClaimed=false;this.lastReward=0}
  get knifeCount(){return this.slots.filter(Boolean).length}
  get hasKnifeSpace(){return this.slots.length<MAX_KNIVES||this.slots.includes(0)}
@@ -30,12 +45,12 @@ export class Arena{
   return true;
  }
  buy(){
-  if(this.coins<this.cost||!this.storeKnife(Math.max(1,Math.min(4,this.best-3))))return false;
+  if(this.coins<this.cost||!this.storeKnife(this.best>=8?this.best-1:Math.max(1,Math.min(4,this.best-3))))return false;
   this.coins-=this.cost;this.buys++;
   this.events.push({type:'buy'});
   return true;
  }
- merge(a,b){if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=this.slots.length||b>=this.slots.length||a===b)return false;const lv=this.slots[a];if(!lv||lv!==this.slots[b]||lv>=8)return false;this.slots[a]=0;this.slots[b]=lv+1;this.best=Math.max(this.best,lv+1);this.equipped=b;this.events.push({type:'merge',level:lv+1});return true}
+ merge(a,b){if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=this.slots.length||b>=this.slots.length||a===b)return false;const lv=this.slots[a];if(!lv||lv!==this.slots[b]||lv>=MAX_BLADE_LEVEL)return false;this.slots[a]=0;this.slots[b]=lv+1;this.best=Math.max(this.best,lv+1);this.equipped=b;this.events.push({type:'merge',level:lv+1});return true}
  move(a,b){if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=this.slots.length||b>=this.slots.length||!this.slots[a]||this.slots[b]||a===b)return false;this.slots[b]=this.slots[a];this.slots[a]=0;if(this.equipped===a)this.equipped=b;return true}
  equip(i){if(!Number.isInteger(i)||i<0||i>=this.slots.length||!this.slots[i])return false;this.equipped=i;return true}
  chooseUpgrade(key){if(this.status!=='won'||this.rewardClaimed)return false;if(key==='coins')this.coins+=25;else if(Object.hasOwn(this.upgrades,key)&&this.upgrades[key]<10)this.upgrades[key]++;else return false;this.rewardClaimed=true;return true}
@@ -62,7 +77,7 @@ export class Arena{
   else {
    if(item.kind==='coins')this.coins+=5;
    else {
-    if(!this.storeKnife(Math.min(5,Math.max(1,this.best-1))))return;
+    if(!this.storeKnife(Math.max(1,this.best-1)))return;
    }
    this.collectedLoot.add(item.kind);
   }

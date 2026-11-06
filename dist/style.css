@@ -35,3 +35,5 @@ body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { dis
 #slots { max-height: min(145px, 20dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 #slots .slot { touch-action: pan-y; }
 #knife-count { margin-inline-start: 5px; color: #e1efbb; white-space: nowrap; }
+
+.collection-item.locked { filter:none; opacity:.72; }
