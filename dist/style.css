@@ -18,3 +18,15 @@ body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { dis
 #quick-merge:disabled { opacity: .65; }
 .inventory-footer { gap: 8px; }
 #target-health .track { outline: 1px solid #ffe3a470; }
+
+#lives { color:#ff7898; font-size:19px; letter-spacing:3px; text-shadow:0 1px 3px #282b20; }
+.blade-mode { display:grid; gap:5px; margin-top:12px; text-align:left; font-size:.85rem; font-weight:700; }
+.blade-mode select { width:100%; padding:8px; font:inherit; border:1px solid #b4a171; border-radius:10px; background:#fff9e6; color:#343b28; }
+#overlay[data-kind="intro"] .card, #overlay[data-kind="help"] .card { border-top:6px solid #86ae66; }
+#overlay .primary { box-shadow:0 3px 0 #23442a70; }
+
+#overlay[data-kind="intro"] .card { background:#ffefcd; padding:20px; text-align:left; }
+#overlay[data-kind="intro"] .guide-art { max-height:175px; object-position:center; }
+#overlay[data-kind="intro"] h1 { margin:.4rem 0; color:#244b37; }
+#overlay[data-kind="intro"] .guide-steps { padding-left:1.4rem; }
+#overlay[data-kind="intro"] .primary { min-height:46px; }

@@ -5,3 +5,21 @@ const b=new Arena();b.stuck=[{angle:Math.PI/2,level:1}];b.shots=[{x:240,y:310,le
 const c=new Arena();c.slots=[4,0,0,0,0,0,0,0];c.equipped=0;assert.equal(c.fire(),true);assert.equal(c.shots.length,3);assert.equal(c.fire(),false);c.begin();c.slots[0]=5;c.fire();assert.equal(c.shots.length,2);assert.ok(c.shots[1].delay>0);
 const d=new Arena();d.slots=[3,0,0,0,0,0,0,0];d.equipped=0;for(let wave=1;wave<=10;wave++){assert.equal(d.wave,wave);assert.equal(d.boss,wave%5===0);const initial=d.coins;for(let i=0;i<20000&&d.status==='playing';i++){d.fire();d.update(1/120)}assert.equal(d.status,'won');assert.equal(d.lives,3);assert.ok(d.coins>=initial+12+wave*4);assert.equal(d.next(),false);assert.equal(d.chooseUpgrade('power'),true);assert.equal(d.next(),true)}
 const lost=new Arena();for(let i=0;i<3;i++){lost.stuck=[{angle:Math.PI/2-lost.angle,level:1}];lost.shots=[{x:240,y:310,level:1,delay:0,hit:false}];lost.update(.01)}assert.equal(lost.status,'lost');assert.equal(lost.fire(),false);lost.begin();assert.equal(lost.lives,3);assert.equal(lost.status,'playing');console.log('Passed: merge rules, buy costs, inventory moves, save validation, rotating collisions, piercing, split/clone, ten complete waves and retry.');
+
+const loot=new Arena();
+const hitPickup=kind=>{
+ const item=loot.pickups().find(p=>p.kind===kind);
+ loot.angle=Math.PI/2-item.angle;
+ loot.shots=[{x:240,y:310,level:3,delay:0,hit:false}];
+ loot.update(.01);
+};
+hitPickup('coins');assert.equal(loot.coins,46);
+hitPickup('blade');assert.equal(loot.slots.filter(Boolean).length,5);
+loot.begin();assert.equal(loot.pickups().some(p=>p.kind==='coins'||p.kind==='blade'),false);
+const recovered=new Arena(loot.snapshot());
+assert.equal(recovered.pickups().some(p=>p.kind==='coins'||p.kind==='blade'),false);
+loot.challenge=true;loot.begin();assert.equal(loot.lives,2);
+loot.angle=Math.PI/2-loot.thornAngle();loot.shots=[{x:240,y:310,level:3,delay:0,hit:false}];loot.update(.01);
+assert.equal(loot.lives,1);assert.equal(loot.hp,loot.maxHP);
+hitPickup('heart');assert.equal(loot.lives,2);assert.equal(loot.pickups().some(p=>p.kind==='heart'),false);
+console.log('Passed: collectible rewards, retry persistence, challenge thorns and heart recovery.');
