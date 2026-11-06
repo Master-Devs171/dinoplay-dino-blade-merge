@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "dino-blade-merge",
   "name": "Dino Blade Merge",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "entry": "dist/index.html",
   "category": "action",
   "age": "7+",

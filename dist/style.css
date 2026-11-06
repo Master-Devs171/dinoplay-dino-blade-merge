@@ -13,3 +13,8 @@
 body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { display: none; }
 #overlay { padding-bottom: 48px; }
 #overlay > div { max-height: calc(100dvh - 72px); overflow: auto; }
+
+#quick-merge { min-height: 38px; border: 1px solid #ffe3a4; border-radius: 10px; padding: 6px 12px; background: #f2cd76; color: #30291c; font-weight: bold; }
+#quick-merge:disabled { opacity: .65; }
+.inventory-footer { gap: 8px; }
+#target-health .track { outline: 1px solid #ffe3a470; }

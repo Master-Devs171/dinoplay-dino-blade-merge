@@ -27,7 +27,31 @@ function target(c){const r=game.boss?83:72;c.save();c.translate(240,238);ellipse
 function draw(){ctx.setTransform(canvas.width/480,0,0,canvas.height/760,0,0);scenery(ctx);target(ctx);for(const shot of game.shots)if(shot.delay<=0)blade(ctx,shot.x,shot.y+20,shot.level,.8,shot.rotation||0);if(game.status==='playing'&&game.cooldown<.1)blade(ctx,240,419,game.level,1.05,Math.sin(clock*2)*.03);for(const p of particles){if(p.text){ctx.font='bold 19px Trebuchet MS';ctx.fillStyle=p.color;ctx.textAlign='center';ctx.fillText(p.text,p.x,p.y)}else ellipse(ctx,p.x,p.y,p.r,p.r,p.color)}ctx.textAlign='left'}
 function icon(level){const cv=document.createElement('canvas');cv.width=cv.height=120;blade(cv.getContext('2d'),60,66,level,1.35);return cv}
 function render(){const slots=$('slots');slots.replaceChildren();game.slots.forEach((level,i)=>{const b=document.createElement('button');b.className='slot'+(level?'':' empty')+(game.equipped===i?' selected':'');b.dataset.slot=i;b.setAttribute('aria-label',level?`Posição ${i+1}, ${BLADES[level].name}, nível ${level}`:`Posição ${i+1}, vazia`);b.setAttribute('aria-pressed',String(game.equipped===i));if(level){b.append(icon(level));const badge=document.createElement('b');badge.textContent=level;b.append(badge)}b.onclick=()=>{if(performance.now()<suppressClick)return;if(paused)return;if(selected!==i&&game.merge(selected,i)){selected=i;notify('Nível '+game.level+' · '+BLADES[game.level].name);tone(700);burst(240,490,BLADES[game.level].color);dirty=true;render()}else if(level){game.equip(i);selected=i;render()}};b.onpointerdown=e=>{if(!level||paused)return;drag={id:e.pointerId,slot:i,x:e.clientX,y:e.clientY,moved:false};b.setPointerCapture(e.pointerId)};b.onpointermove=e=>{if(!drag||drag.id!==e.pointerId)return;if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>8)drag.moved=true;if(drag.moved){$('ghost').hidden=false;$('ghost').replaceChildren(icon(level));$('ghost').style.left=e.clientX+'px';$('ghost').style.top=e.clientY+'px'}};b.onpointerup=e=>{if(!drag||drag.id!==e.pointerId)return;const d=drag;drag=null;$('ghost').hidden=true;if(d.moved){suppressClick=performance.now()+200;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');if(target){const j=Number(target.dataset.slot);if(game.merge(d.slot,j)){notify('Fusão! '+BLADES[game.level].name);tone(720);selected=j;dirty=true;render()}else if(game.move(d.slot,j)){selected=j;dirty=true;render()}}}};b.onpointercancel=()=>{drag=null;$('ghost').hidden=true};slots.append(b)});$('coins').textContent=game.coins;$('cost').textContent=game.cost+' ◈';$('buy').disabled=game.coins<game.cost||!game.slots.includes(0);$('effect').textContent=BLADES[game.level].effect;const stages=$('stages');stages.replaceChildren();const base=Math.floor((game.wave-1)/5)*5;for(let i=1;i<=5;i++){const n=base+i,s=document.createElement('span');s.textContent=n;s.className=n===game.wave?'active':n<game.wave?'done':'';s.setAttribute('aria-label','Fase '+n+(n===game.wave?', atual':''));stages.append(s)}updateHUD()}
-function updateHUD(){$('freeze').disabled=game.wave<3||game.freezeUsed||paused;$('freeze').classList.toggle('active',game.freezeTime>0);$('freeze-status').textContent=game.wave<3?'FASE 3':game.freezeTime>0?game.freezeTime.toFixed(1)+' s':game.freezeUsed?'USADO':'3 SEGUNDOS';$('health').textContent=game.hp+' / '+game.maxHP;$('hp').style.width=game.hp/game.maxHP*100+'%';$('boss').textContent=game.boss?'TRONCO ANCESTRAL':'ALVO DA FLORESTA';$('coins').textContent=game.coins;$('buy').disabled=game.coins<game.cost||!game.slots.includes(0);$('lives').replaceChildren();for(let i=0;i<3;i++){const h=document.createElement('i');h.className=i>=game.lives?'empty':'';$('lives').append(h)}$('lives').setAttribute('aria-label',game.lives+' tentativas restantes')}
+function bestMergePair() {
+ const firstByLevel = new Map();
+ let best = null;
+ for (const [slot, level] of game.slots.entries()) {
+  if (!level || level >= 8) continue;
+  if (!firstByLevel.has(level)) firstByLevel.set(level, slot);
+  else if (!best || level > best.level) best = {from: firstByLevel.get(level), to: slot, level};
+ }
+ return best;
+}
+$('quick-merge').onclick = () => {
+ const pair = bestMergePair();
+ if (paused || !pair || !game.merge(pair.from, pair.to)) return;
+ selected = pair.to;
+ dirty = true;
+ render();
+ notify('Fusão! ' + BLADES[game.level].name);
+ tone(720);
+};
+function updateHUD(){
+ const pair = bestMergePair();
+ const mergeButton = $('quick-merge');
+ mergeButton.disabled = paused || !pair;
+ mergeButton.textContent = pair ? 'Fundir nível ' + pair.level : 'Sem pares';
+$('freeze').disabled=game.wave<3||game.freezeUsed||paused;$('freeze').classList.toggle('active',game.freezeTime>0);$('freeze-status').textContent=game.wave<3?'FASE 3':game.freezeTime>0?game.freezeTime.toFixed(1)+' s':game.freezeUsed?'USADO':'3 SEGUNDOS';$('health').textContent=game.hp+' / '+game.maxHP;$('hp').style.width=game.hp/game.maxHP*100+'%';$('boss').textContent=game.boss?'TRONCO ANCESTRAL':'ALVO DA FLORESTA';$('coins').textContent=game.coins;$('buy').disabled=game.coins<game.cost||!game.slots.includes(0);$('lives').replaceChildren();for(let i=0;i<3;i++){const h=document.createElement('i');h.className=i>=game.lives?'empty':'';$('lives').append(h)}$('lives').setAttribute('aria-label',game.lives+' tentativas restantes')}
 function tone(freq){if(!sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.frequency.setValueAtTime(freq,audio.currentTime);o.frequency.exponentialRampToValueAtTime(freq*.7,audio.currentTime+.08);g.gain.setValueAtTime(.035,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.14);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15)}catch{}}
 function notify(text){$('toast').textContent=text;$('toast').classList.add('show');toastUntil=clock+2.3}
 function burst(x,y,color,text){for(let k=0;k<10;k++)particles.push({x,y,vx:Math.cos(k)*70,vy:Math.sin(k)*70-30,life:.5,r:2+k%3,color});if(text)particles.push({x,y:y-15,vx:0,vy:-40,life:.6,color:'#fff3b6',text})}
