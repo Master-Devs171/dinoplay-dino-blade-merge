@@ -37,3 +37,9 @@ body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { dis
 #knife-count { margin-inline-start: 5px; color: #e1efbb; white-space: nowrap; }
 
 .collection-item.locked { filter:none; opacity:.72; }
+
+#slots { grid-template-columns:repeat(5,minmax(0,1fr)); max-height:none; overflow:visible; }
+#slots .slot { touch-action:none; }
+.inventory-footer { flex-wrap:wrap; }
+#trash { min-height:38px; border:1px dashed #eed8a2; border-radius:10px; background:#4c3d34; color:#fff4d8; padding:5px 8px; font-weight:bold; }
+#trash:disabled { opacity:.65; }

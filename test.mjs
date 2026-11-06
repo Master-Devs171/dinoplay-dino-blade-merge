@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';import {Arena,angularDistance,MAX_KNIVES,MAX_BLADE_LEVEL,BLADES} from './dist/engine-v1.3.1.js';
+import assert from 'node:assert/strict';import {Arena,angularDistance,MAX_KNIVES,MAX_BLADE_LEVEL,BLADES} from './dist/engine-v1.4.0.js';
 const a=new Arena();assert.equal(a.merge(0,0),false);assert.equal(a.merge(-1,0),false);assert.equal(a.merge(0,2),false);assert.equal(a.merge(0,1),true);assert.equal(a.slots[0],0);assert.equal(a.slots[1],2);assert.equal(a.level,2);assert.equal(a.merge(1,2),true);assert.equal(a.level,3);assert.equal(a.best,3);const before=a.coins,cost=a.cost;assert.equal(a.buy(),true);assert.equal(a.coins,before-cost);assert.equal(a.slots[0],1);a.coins=0;assert.equal(a.buy(),false);assert.equal(a.coins,0);assert.equal(a.move(0,7),true);assert.equal(a.slots[7],1);assert.equal(a.slots[0],0);assert.equal(a.move(7,2),false);
 const snap=a.snapshot(),restored=new Arena(snap);assert.deepEqual(restored.slots,a.slots);assert.equal(restored.wave,a.wave);assert.equal(new Arena({slots:[99]}).slots[0],1);assert.equal(new Arena({slots:Array(8).fill(0)}).slots[0],1);assert.ok(angularDistance(.01,Math.PI*2-.01)<.03);
 const b=new Arena();b.stuck=[{angle:Math.PI/2,level:1}];b.shots=[{x:240,y:310,level:1,delay:0,hit:false}];b.update(.01);assert.equal(b.lives,2);assert.equal(b.hp,b.maxHP);assert.equal(b.stuck.length,0);b.shots=[{x:240,y:310,level:3,delay:0,hit:false}];b.stuck=[{angle:Math.PI/2-b.angle,level:1}];b.update(.01);assert.ok(b.hp<b.maxHP);assert.equal(b.lives,2);
@@ -21,7 +21,7 @@ while(storage.buy()){}
 assert.equal(storage.knifeCount,MAX_KNIVES);
 assert.equal(new Arena(storage.snapshot()).knifeCount,MAX_KNIVES);
 assert.equal(storage.buy(),false);
-assert.equal(storage.merge(48,49),true);
+assert.equal(storage.merge(8,9),true);
 assert.equal(storage.buy(),true);
 assert.equal(storage.slots.length,MAX_KNIVES);
 const race=new Arena(),speed=race.rotationSpeed;
@@ -29,7 +29,7 @@ race.wave=8;race.begin();
 assert.ok(race.rotationSpeed>speed);
 assert.ok(race.maxHP>14);
 const d=new Arena();d.slots=[3,0,0,0,0,0,0,0];d.equipped=0;for(let wave=1;wave<=10;wave++){assert.equal(d.wave,wave);assert.equal(d.boss,wave%5===0);const initial=d.coins;for(let i=0;i<20000&&d.status==='playing';i++){d.fire();d.update(1/120)}assert.equal(d.status,'won');assert.equal(d.lives,3);assert.ok(d.coins>=initial+12+wave*4);assert.equal(d.next(),false);assert.equal(d.chooseUpgrade('power'),true);assert.equal(d.next(),true)}
-const lost=new Arena();for(let i=0;i<3;i++){lost.stuck=[{angle:Math.PI/2-lost.angle,level:1}];lost.shots=[{x:240,y:310,level:1,delay:0,hit:false}];lost.update(.01)}assert.equal(lost.status,'lost');assert.equal(lost.fire(),false);lost.begin();assert.equal(lost.lives,3);assert.equal(lost.status,'playing');console.log('Passed: merge rules, buy costs, inventory moves, save validation, rotating collisions, piercing, one blade in flight, 50-slot inventory, ten complete waves and retry.');
+const lost=new Arena();for(let i=0;i<3;i++){lost.stuck=[{angle:Math.PI/2-lost.angle,level:1}];lost.shots=[{x:240,y:310,level:1,delay:0,hit:false}];lost.update(.01)}assert.equal(lost.status,'lost');assert.equal(lost.fire(),false);lost.begin();assert.equal(lost.lives,3);assert.equal(lost.status,'playing');console.log('Passed: merge rules, buy costs, inventory moves, save validation, rotating collisions, piercing, one blade in flight, 10-slot inventory, ten complete waves and retry.');
 
 const loot=new Arena();
 const hitPickup=kind=>{
@@ -65,3 +65,14 @@ legendary.coins=1000;
 assert.equal(legendary.buy(),true);
 assert.ok(legendary.slots.includes(49));
 console.log('Passed: 50 blade types, fusion past level 8 and level 50 saves.');
+
+const recycling=new Arena();const paid=recycling.cost;
+assert.equal(recycling.buy(),true);
+assert.equal(recycling.discard(4),Math.floor(paid/2));
+assert.equal(recycling.coins,40-paid+Math.floor(paid/2));
+const legacy=new Arena({slots:Array(18).fill(3),coins:0});
+assert.equal(legacy.knifeCount,10);assert.equal(legacy.reserve.length,8);
+assert.equal(legacy.discard(0),6);assert.equal(legacy.knifeCount,10);
+assert.equal(new Arena(legacy.snapshot()).reserve.length,7);
+const lastBlade=new Arena({slots:[1,0,0,0,0,0,0,0]});
+assert.equal(lastBlade.discard(0),null);
