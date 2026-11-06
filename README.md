@@ -2,7 +2,7 @@
 
 Jogo de fusão e lançamento de lâminas contra troncos rotativos. Inspirado no ciclo de jogo de Knife Merge, com implementação e gráficos Canvas próprios. Sem recursos, código ou marcas de terceiros. Não é uma reprodução 100% do original.
 
-Arrasta duas lâminas iguais para as fundir ou toca numa e depois noutra igual. Segura Lançar ou Espaço para disparar. Lâminas de nível 3 ou superior perfuram as que estão presas; níveis posteriores acrescentam divisão, clonagem, retorno e ricochete com trajetos animados e impactos secundários. O alvo ancestral surge a cada cinco fases. Compras usam apenas moedas ganhas no jogo.
+Arrasta duas lâminas iguais para as fundir ou toca numa e depois noutra igual. Segura Lançar ou Espaço para disparar uma faca de cada vez. O inventário cresce até 50 facas. Lâminas de nível 3 ou superior perfuram as que estão presas e as mais avançadas podem voltar ou fazer ricochete antes do próximo disparo. As fases avançadas aceleram a rotação do alvo e variam o ritmo. O alvo ancestral surge a cada cinco fases. Compras usam apenas moedas ganhas no jogo.
 
 Funciona com rato, teclado e toque. Opções de som, pausa automática e progresso local. Sem anúncios, contas, pagamentos ou rede em tempo de jogo.
 

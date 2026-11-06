@@ -30,3 +30,8 @@ body:not(:has(#menu:not([hidden]), #overlay:not([hidden]))) #dinoplay-exit { dis
 #overlay[data-kind="intro"] h1 { margin:.4rem 0; color:#244b37; }
 #overlay[data-kind="intro"] .guide-steps { padding-left:1.4rem; }
 #overlay[data-kind="intro"] .primary { min-height:46px; }
+
+/* The inventory scrolls without covering the launch button. */
+#slots { max-height: min(145px, 20dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+#slots .slot { touch-action: pan-y; }
+#knife-count { margin-inline-start: 5px; color: #e1efbb; white-space: nowrap; }
